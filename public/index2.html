@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Peta Real-Time</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Leaflet Peta -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #f8fafc;
+      }
+
+      header {
+        background: #ffffff;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+      }
+      h1 {
+        font-size: 1.1rem;
+        color: #0f172a;
+      }
+      .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #fef2f2;
+        color: #dc2626;
+        font-weight: 500;
+      }
+      .status-badge.connected {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+
+      #map {
+        flex: 1;
+        width: 100%;
+      }
+
+      .info-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: 360px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        z-index: 1000;
+        font-size: 0.85rem;
+        color: #334155;
+      }
+      .info-panel strong {
+        color: #0f172a;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Pemantau Lokasi Real-Time</h1>
+      <div class="status-badge" id="status-badge">Menunggu Pengguna...</div>
+    </header>
+
+    <div id="map"></div>
+
+    <div class="info-panel" id="info-panel">
+      <strong>Status:</strong>
+      <span id="info-text">Belum ada data lokasi masuk.</span><br />
+      <span id="coord-text"></span>
+    </div>
+
+    <!-- JS Leaflet & Socket.io -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const statusBadge = document.getElementById("status-badge");
+      const infoText = document.getElementById("info-text");
+      const coordText = document.getElementById("coord-text");
+
+      // Inisialisasi Peta Leaflet (Posisi Default Indonesia)
+      const map = L.map("map").setView([-2.548926, 118.014863], 5);
+
+      // Menggunakan OpenStreetMap
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap",
+      }).addTo(map);
+
+      // Objek penampung marker dan riwayat posisi (polyline/garis rute)
+      const userMarkers = {};
+      const userRoutes = {};
+      const userPathCoordinates = {};
+
+      // Menerima data lokasi dari server
+      socket.on("receive-location", (data) => {
+        const { id, latitude, longitude, timestamp } = data;
+
+        statusBadge.innerText = "Pengguna Aktif";
+        statusBadge.classList.add("connected");
+
+        infoText.innerText = `Terakhir diperbarui: ${timestamp}`;
+        coordText.innerText = `Koordinat: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+        const newLatLng = [latitude, longitude];
+
+        // Jika pengguna baru, buat Marker dan Garis Trek baru
+        if (!userMarkers[id]) {
+          // Pin Lokasi
+          userMarkers[id] = L.marker(newLatLng)
+            .addTo(map)
+            .bindPopup(`<b>Teman Anda</b><br>Update: ${timestamp}`)
+            .openPopup();
+
+          // Inisialisasi array koordinat untuk garis
+          userPathCoordinates[id] = [newLatLng];
+
+          // Membuat Garis Merah Real-Time
+          userRoutes[id] = L.polyline(userPathCoordinates[id], {
+            color: "#ef4444",
+            weight: 5,
+            opacity: 0.8,
+            smoothFactor: 1,
+          }).addTo(map);
+
+          // Zoom otomatis ke lokasi pengguna
+          map.setView(newLatLng, 17);
+        } else {
+          // Update Posisi Marker
+          userMarkers[id].setLatLng(newLatLng);
+          userMarkers[id]
+            .getPopup()
+            .setContent(`<b>Teman Anda</b><br>Update: ${timestamp}`);
+
+          // Tambahkan titik baru ke dalam riwayat garis rute
+          userPathCoordinates[id].push(newLatLng);
+          userRoutes[id].setLatLngs(userPathCoordinates[id]);
+
+          // Pindahkan kamera peta mengikuti pergerakan teman secara smooth
+          map.panTo(newLatLng);
+        }
+      });
+
+      // Ketika pengguna terputus
+      socket.on("user-disconnected", (id) => {
+        if (userMarkers[id]) {
+          map.removeLayer(userMarkers[id]);
+          delete userMarkers[id];
+        }
+        statusBadge.innerText = "Pengguna Terputus";
+        statusBadge.classList.remove("connected");
+        infoText.innerText = "Teman Anda telah memutuskan koneksi.";
+        coordText.innerText = "";
+      });
+    </script>
+  </body>
+</html>
