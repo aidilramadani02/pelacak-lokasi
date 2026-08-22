@@ -12,62 +12,100 @@
             height: 100vh;
             flex-direction: column;
             font-family: sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f0f0f0; /* Latar abu-abu terang agar tombol terlihat menonjol */
             margin: 0;
         }
 
-        /* Tombol Animasi */
-        .animated-btn {
+        h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 30px;
+            color: #666;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        /* Kontainer Tombol untuk Bayangan Alas */
+        .button-container {
             position: relative;
-            width: 150px;
-            height: 150px;
+            padding-bottom: 20px; /* Ruang untuk bayangan alas */
+        }
+
+        /* Gaya Tombol 3D Realistis */
+        .3d-btn {
+            position: relative;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
-            background: linear-gradient(145deg, #ff4d4d, #cc0000);
-            color: white;
             border: none;
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 8px 20px rgba(204, 0, 0, 0.4);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             outline: none;
-            overflow: hidden;
-            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            
+            /* Gradien Merah 3D */
+            background: radial-gradient(circle at 50% 40%, #ff6666, #cc0000 70%, #990000);
+            
+            /* Bingkai/Alas Hitam Berlapis */
+            box-shadow: 
+                0 0 0 4px #333, /* Bingkai dalam gelap */
+                0 0 0 12px #111, /* Alas hitam luar */
+                0 15px 25px rgba(0,0,0,0.5), /* Bayangan jatuh realistis */
+                inset 0 2px 2px rgba(255,255,255,0.4), /* Kilatan atas bagian dalam */
+                inset 0 -10px 15px rgba(0,0,0,0.2); /* Bayangan bawah bagian dalam */
+            
+            transition: all 0.1s ease-out;
+            overflow: hidden; /* Untuk efek ripple */
         }
 
-        /* Animasi Tekan (Click/Active) */
-        .animated-btn:active {
-            transform: scale(0.92);
-            box-shadow: 0 4px 10px rgba(204, 0, 0, 0.6);
+        /* Efek Hover (Saat Kursor di Atas Tombol) */
+        .3d-btn:hover {
+            background: radial-gradient(circle at 50% 40%, #ff8080, #dd0000 70%, #b30000);
         }
 
-        /* Efek Gelombang Riak (Ripple Effect) */
-        .animated-btn::after {
+        /* Efek Tekan (Animasi Klik Realistis) */
+        .3d-btn:active {
+            transform: translateY(4px); /* Tombol bergerak turun */
+            box-shadow: 
+                0 0 0 4px #333,
+                0 0 0 12px #111,
+                0 8px 15px rgba(0,0,0,0.5), /* Bayangan luar mengecil */
+                inset 0 5px 10px rgba(0,0,0,0.3); /* Bayangan dalam menonjol */
+        }
+
+        /* Efek Gelombang Riak (Ripple) Saat Diklik */
+        .3d-btn::after {
             content: "";
             position: absolute;
             top: 50%;
             left: 50%;
             width: 5px;
             height: 5px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
             opacity: 0;
             border-radius: 100%;
             transform: scale(1, 1) translate(-50%, -50%);
             transform-origin: 50% 50%;
         }
 
-        .animated-btn:focus:not(:active)::after {
+        .3d-btn:focus:not(:active)::after {
             animation: ripple 0.6s ease-out;
         }
 
         @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(40, 40);
-                opacity: 0;
-            }
+            0% { transform: scale(0, 0); opacity: 0.6; }
+            100% { transform: scale(40, 40); opacity: 0; }
+        }
+
+        #status {
+            margin-top: 25px;
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
@@ -75,15 +113,18 @@
     <h2>Bagikan Lokasi Anda</h2>
     <p>Tekan tombol di bawah untuk memberikan akses lokasi Anda secara langsung.</p>
     
-    <button id="btn" class="animated-btn">Kirim Lokasi</button>
+    <div class="button-container">
+        <button id="btn" class="3d-btn">Kirim Lokasi</button>
+    </div>
     
-    <p id="status" style="margin-top:20px; font-weight:bold;"></p>
+    <p id="status"></p>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // Konfigurasi Firebase Anda (JANGAN DIUBAH)
         const firebaseConfig = {
             apiKey: "AIzaSyBK8bGxy4z3x9TISxbXUnb2ZtNZsD6i6Ew",
             authDomain: "pelacak-lokasi-68500.firebaseapp.com",
