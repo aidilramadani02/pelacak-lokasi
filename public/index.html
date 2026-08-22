@@ -6,41 +6,78 @@
     <title>Akses Lokasi</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
+            flex-direction: column;
+            font-family: sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
-            background-color: #f4f4f9;
         }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
+
+        /* Tombol Animasi */
+        .animated-btn {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff4d4d, #cc0000);
+            color: white;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #status {
-            margin-top: 15px;
+            font-size: 18px;
             font-weight: bold;
-            color: #333;
+            box-shadow: 0 8px 20px rgba(204, 0, 0, 0.4);
+            outline: none;
+            overflow: hidden;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        /* Animasi Tekan (Click/Active) */
+        .animated-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 4px 10px rgba(204, 0, 0, 0.6);
+        }
+
+        /* Efek Gelombang Riak (Ripple Effect) */
+        .animated-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+
+        .animated-btn:focus:not(:active)::after {
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(40, 40);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-
     <h2>Bagikan Lokasi Anda</h2>
-    <button id="btn">Kirim Lokasi Saat Ini</button>
-    <p id="status"></p>
+    <p>Tekan tombol di bawah untuk memberikan akses lokasi Anda secara langsung.</p>
+    
+    <button id="btn" class="animated-btn">Kirim Lokasi</button>
+    
+    <p id="status" style="margin-top:20px; font-weight:bold;"></p>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
