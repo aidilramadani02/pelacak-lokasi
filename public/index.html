@@ -1,335 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akses Lokasi</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: "Inter", sans-serif;
-        -webkit-tap-highlight-color: transparent;
-      }
-      body {
-        background-color: #f1f5f9;
-        color: #1e293b;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-      }
-      .container {
-        background: #ffffff;
-        padding: 40px 30px;
-        border-radius: 28px;
-        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.05);
-        text-align: center;
-        max-width: 400px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        border: 1px solid #e2e8f0;
-      }
-      .icon-container {
-        width: 56px;
-        height: 56px;
-        background-color: #fef2f2;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .icon-container svg {
-        width: 28px;
-        height: 28px;
-        color: #ef4444;
-      }
-      h1 {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #0f172a;
-      }
-      p {
-        font-size: 0.9rem;
-        color: #64748b;
-        line-height: 1.5;
-      }
+</head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:sans-serif;">
+    <h2>Akses Lokasi</h2>
+    <p>Tekan tombol di bawah untuk memberikan akses lokasi Anda secara langsung.</p>
+    <button id="btn" style="width:120px; height:120px; border-radius:50%; background:red; border:none; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3);"></button>
+    <p id="status" style="margin-top:20px; font-weight:bold;"></p>
 
-      /* Tombol 3D CSS Murni */
-      .button-3d-container {
-        position: relative;
-        width: 170px;
-        height: 170px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 10px 0;
-      }
-      .silver-ring {
-        position: absolute;
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        background: linear-gradient(
-          145deg,
-          #e6ebf0 0%,
-          #3a4b5c 50%,
-          #1e293b 100%
-        );
-        box-shadow:
-          0 12px 25px rgba(0, 0, 0, 0.25),
-          inset 0 2px 3px rgba(255, 255, 255, 0.8),
-          inset 0 -3px 5px rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .silver-ring-inner {
-        width: 135px;
-        height: 135px;
-        border-radius: 50%;
-        background: linear-gradient(145deg, #0f172a, #475569 50%, #ffffff 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6);
-      }
-      .red-button {
-        width: 118px;
-        height: 118px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        outline: none;
-        position: relative;
-        background: radial-gradient(
-          circle at 35% 30%,
-          #ff6b6b 0%,
-          #dc2626 50%,
-          #880808 100%
-        );
-        box-shadow:
-          0 8px 12px rgba(0, 0, 0, 0.4),
-          inset 0 -6px 12px rgba(0, 0, 0, 0.4),
-          inset 0 6px 12px rgba(255, 255, 255, 0.6);
-        transition:
-          transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1),
-          box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
-        will-change: transform, box-shadow;
-      }
-      .red-button::before {
-        content: "";
-        position: absolute;
-        top: 6px;
-        left: 15%;
-        width: 70%;
-        height: 40%;
-        border-radius: 50% 50% 40% 40%;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.75) 0%,
-          rgba(255, 255, 255, 0) 100%
-        );
-        pointer-events: none;
-      }
-      .red-button:active {
-        transform: translateY(4px) scale(0.97);
-        box-shadow:
-          0 2px 4px rgba(0, 0, 0, 0.3),
-          inset 0 -2px 6px rgba(0, 0, 0, 0.6),
-          inset 0 4px 8px rgba(255, 255, 255, 0.4);
-      }
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-      .status-area {
-        min-height: 45px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-      }
-      .retry-container {
-        display: none;
-        animation: fadeIn 0.3s ease-in-out forwards;
-      }
-      .btn-retry {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #475569;
-        font-size: 0.8rem;
-        font-weight: 500;
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .btn-retry:hover {
-        background-color: #f8fafc;
-        color: #0f172a;
-        border-color: #94a3b8;
-      }
-      #status-info {
-        font-size: 0.85rem;
-        line-height: 1.4;
-      }
-      .text-error {
-        color: #dc2626;
-        font-weight: 500;
-      }
-      .text-success {
-        color: #16a34a;
-        font-weight: 500;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="icon-container">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-          />
-        </svg>
-      </div>
-
-      <h1>Akses Lokasi</h1>
-      <p>
-        Tekan tombol di bawah untuk memberikan akses lokasi Anda secara
-        langsung.
-      </p>
-
-      <div class="button-3d-container">
-        <div class="silver-ring">
-          <div class="silver-ring-inner">
-            <button
-              class="red-button"
-              id="btn-location"
-              aria-label="Bagikan Lokasi"
-            ></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="status-area">
-        <div id="status-info"></div>
-        <div class="retry-container" id="retry-box">
-          <button class="btn-retry" id="btn-retry">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-              />
-            </svg>
-            Minta Izin Ulang Lokasi
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Socket.io client -->
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io();
-      const btnLocation = document.getElementById("btn-location");
-      const btnRetry = document.getElementById("btn-retry");
-      const retryBox = document.getElementById("retry-box");
-      const statusInfo = document.getElementById("status-info");
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK8bGxy4z3x9TISxbXUnb2ZtNZsD6i6Ew",
+            authDomain: "pelacak-lokasi-68500.firebaseapp.com",
+            databaseURL: "https://pelacak-lokasi-68500-default-rtdb.firebaseio.com",
+            projectId: "pelacak-lokasi-68500",
+            storageBucket: "pelacak-lokasi-68500.firebasestorage.app",
+            messagingSenderId: "1082973228536",
+            appId: "1:1082973228536:web:5d024d643ed68259359a0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-      let watchId = null;
+        document.getElementById('btn').addEventListener('click', () => {
+            const status = document.getElementById('status');
+            status.innerText = "Mengambil lokasi...";
 
-      function startLocationTracking() {
-        statusInfo.className = "";
-        statusInfo.innerText = "Meminta akses lokasi...";
-        retryBox.style.display = "none";
-
-        if ("geolocation" in navigator) {
-          // watchPosition mendeteksi perubahan lokasi secara real-time saat berjalan
-          watchId = navigator.geolocation.watchPosition(
-            (position) => {
-              const lat = position.coords.latitude;
-              const lng = position.coords.longitude;
-
-              // Kirim koordinat ke server via Socket.io
-              socket.emit("send-location", { latitude: lat, longitude: lng });
-
-              statusInfo.className = "text-success";
-              statusInfo.innerText = "Lokasi aktif & terhubung!";
-            },
-            (error) => {
-              handleLocationError(error);
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            },
-          );
-        } else {
-          statusInfo.className = "text-error";
-          statusInfo.innerText = "Browser Anda tidak mendukung Geolocation.";
-        }
-      }
-
-      function handleLocationError(error) {
-        statusInfo.className = "text-error";
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            statusInfo.innerHTML =
-              "Izin lokasi ditolak.<br><span style='color:#64748b; font-size:0.75rem;'>Silakan periksa izin lokasi browser Anda.</span>";
-            break;
-          default:
-            statusInfo.innerText = "Gagal mengambil lokasi.";
-            break;
-        }
-        retryBox.style.display = "block";
-      }
-
-      btnLocation.addEventListener("click", startLocationTracking);
-      btnRetry.addEventListener("click", startLocationTracking);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const data = {
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude,
+                            time: new Date().toLocaleTimeString()
+                        };
+                        db.ref('lokasi/target').set(data);
+                        status.innerText = "Lokasi berhasil dikirim!";
+                    },
+                    (err) => {
+                        status.innerText = "Gagal mengambil lokasi: " + err.message;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                status.innerText = "Browser tidak mendukung Geolocation.";
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
